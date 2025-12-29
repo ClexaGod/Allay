@@ -198,6 +198,9 @@ public class AllayPlayer implements Player {
     protected boolean clientCacheEnabled;
     protected boolean shouldSendCommands;
     @Getter
+    @Setter
+    protected boolean containerClosedByClient;
+    @Getter
     protected Speed speed, flySpeed, verticalFlySpeed;
 
     // Container
@@ -557,10 +560,14 @@ public class AllayPlayer implements Player {
         return map;
     }
 
+    /**
+     * Adds generic metadata for the specified {@code entity} to the provided {@code map}.
+     */
     protected void addGenericMetadata(Entity entity, EntityDataMap map) {
         map.setFlag(EntityFlag.HAS_COLLISION, entity.hasEntityCollision());
         map.setFlag(EntityFlag.CAN_CLIMB, true);
         map.setFlag(EntityFlag.INVISIBLE, entity.isInvisible());
+        map.setFlag(EntityFlag.NO_AI, entity.isImmobile());
         var aabb = entity.getAABB();
         var nbt = NbtMap.builder()
                 .putFloat("MinX", 0)
@@ -591,6 +598,10 @@ public class AllayPlayer implements Player {
         }
     }
 
+    /**
+     * Adds component-specific metadata to the {@code map} for the given {@code entity}. This method
+     * applies metadata based on its specific components.
+     */
     protected void addComponentSpecificMetadata(Entity entity, EntityDataMap map) {
         if (entity instanceof EntityPhysicsComponent physicsComponent) {
             map.setFlag(EntityFlag.HAS_GRAVITY, physicsComponent.hasGravity());
@@ -604,6 +615,11 @@ public class AllayPlayer implements Player {
         }
     }
 
+    /**
+     * Adds type-specific metadata for a given entity to the provided {@code EntityDataMap}. Based on
+     * the type of the entity, this method updates the metadata to reflect the entity's specific state,
+     * attributes, and flags.
+     */
     protected void addTypeSpecificMetadata(Entity entity, EntityDataMap map) {
         switch (entity) {
             case EntityTnt tnt -> {
@@ -652,6 +668,9 @@ public class AllayPlayer implements Player {
                 if (attachedPlayer != null) {
                     map.put(EntityDataTypes.CUSTOM_DISPLAY, (byte) attachedPlayer.getRuntimeId());
                 }
+            }
+            case EntityEnderCrystal enderCrystal -> {
+                map.setFlag(EntityFlag.SHOW_BOTTOM, enderCrystal.isBaseVisible());
             }
             default -> {
             }
@@ -1353,6 +1372,14 @@ public class AllayPlayer implements Player {
         sendPacket(packet);
     }
 
+    @Override
+    public void stopSound(String soundName) {
+        var packet = new StopSoundPacket();
+        packet.setSoundName(Objects.requireNonNullElse(soundName, ""));
+        packet.setStoppingAllSound(soundName == null);
+        sendPacket(packet);
+    }
+
     protected SoundEvent getEquipSound(ItemType<?> itemType) {
         if (itemType == ItemTypes.ELYTRA) {
             return SoundEvent.ARMOR_EQUIP_ELYTRA;
@@ -1639,6 +1666,13 @@ public class AllayPlayer implements Player {
         var packet = new ContainerClosePacket();
         packet.setId(assignedId);
         packet.setType(ContainerNetworkInfo.getInfo(container.getContainerType()).toNetworkType());
+        if (!this.containerClosedByClient) {
+            // Field `serverInitiated` determines whether the server force-closed the container. If this value is
+            // not set correctly, the client may ignore the packet and respond with a `PacketViolationWarningPacket`.
+            packet.setServerInitiated(true);
+        } else {
+            this.containerClosedByClient = false;
+        }
         sendPacket(packet);
     }
 
@@ -2374,6 +2408,14 @@ public class AllayPlayer implements Player {
     @Override
     public boolean getHudElementVisibility(HudElement element) {
         return !this.hiddenHudElements.contains(element);
+    }
+
+    @Override
+    public void transfer(String ip, int port) {
+        var packet = new TransferPacket();
+        packet.setAddress(ip);
+        packet.setPort(port);
+        sendPacket(packet);
     }
 
     /**

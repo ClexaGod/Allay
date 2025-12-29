@@ -5,6 +5,7 @@ import org.allaymc.api.item.interfaces.ItemAirStack;
 import org.cloudburstmc.nbt.NbtMap;
 import org.jetbrains.annotations.UnmodifiableView;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -108,6 +109,20 @@ public interface Container {
     }
 
     /**
+     * Check if the container is full.
+     *
+     * @return {@code true} if the container is full, otherwise {@code false}.
+     */
+    default boolean isFull() {
+        for (var stack : getItemStackArray()) {
+            if (stack == ItemAirStack.AIR_STACK || !stack.isFull()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Get the item stacks of the container.
      *
      * @return the item stacks
@@ -187,7 +202,7 @@ public interface Container {
      * Removes all viewers from this container.
      */
     default void removeAllViewers() {
-        getViewers().values().forEach(this::removeViewer);
+        new ArrayList<>(getViewers().values()).forEach(this::removeViewer);
     }
 
     /**

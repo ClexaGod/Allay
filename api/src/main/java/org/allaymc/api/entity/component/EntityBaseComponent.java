@@ -55,6 +55,11 @@ public interface EntityBaseComponent extends EntityComponent, CommandSender, Has
     EntityType<? extends Entity> getEntityType();
 
     /**
+     * Broadcasts the current entity state to all its viewers.
+     */
+    void broadcastState();
+
+    /**
      * Get the display name of the entity.
      * <p>
      * Display name is used in chat, damage message, etc. Normally, it is equal to the origin name.
@@ -126,6 +131,21 @@ public interface EntityBaseComponent extends EntityComponent, CommandSender, Has
      * @param invisible whether the body of this entity is invisible to its viewers
      */
     void setInvisible(boolean invisible);
+
+    /**
+     * Checks if the entity is currently immobile.
+     *
+     * @return {@code true} if the Player is currently immobile.
+     */
+    boolean isImmobile();
+
+    /**
+     * Sets the immobile state of an object. When set to {@code true}, the entity can't move
+     * around, but is still allowed to look around.
+     *
+     * @param immobile {@code true} to make the entity immobile, {@code false} to make it mobile.
+     */
+    void setImmobile(boolean immobile);
 
     /**
      * Gets the last location of this entity.
@@ -376,11 +396,9 @@ public interface EntityBaseComponent extends EntityComponent, CommandSender, Has
     }
 
     /**
-     * Try to set this entity's location. This method is intended to be called by physics engine,
-     * and user is not expected to call it.
-     * <p>
-     * The implementation will call {@link EntityMoveEvent}, and because this event is cancellable,
-     * the method call may not be valid.
+     * Try to set this entity's location. This method is intended to be called by the physics engine, and the
+     * user is not expected to call it. The implementation will call {@link EntityMoveEvent}, and because this
+     * event is cancellable, the method call may not be valid.
      *
      * @param newLocation the new location that this entity moves to
      * @return {@code true} if the method call is valid, {@code false} otherwise.

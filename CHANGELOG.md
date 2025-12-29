@@ -12,18 +12,42 @@ Unless otherwise specified, any version comparison below is the comparison of th
 
 # 0.10.3 (API 0.20.0) - Unreleased
 
-<small>[Compare with 0.10.0](https://github.com/AllayMC/Allay/compare/0.10.2...HEAD)</small>
+<small>[Compare with 0.10.2](https://github.com/AllayMC/Allay/compare/0.10.2...HEAD)</small>
 
 ### Added
 
 - (API) Added API for setting player hud element's visibility.
-- Implemented Totem of Undying activation for players.
+- (API) Added `Runnable` overloads to `Scheduler` for `scheduleDelayed`, `scheduleRepeating`, and `scheduleDelayedRepeating` methods.
+- (API) Added methods `WorldViewer.stopSound(String)` and `WorldViewer.stopAllSounds()`.
+- (API) Added method `Player.transfer()` to transfer the player to another server.
+- (API) Added method `Entity.setImmobile()` to make the entity immobile.
+- (API) Added method `Container.isFull()` to check if a container is full.
+- (API) Added method `BlockEntityChest.getDoubleChestContainer()` to get the container object to use when the chest is paired.
+- (API) Implemented hopper:
+  - (API) Added `BlockEntityHopper` and related interfaces.
+  - (API) Added `SidedContainer` interface to represent a container that restricts insertion/extraction by side.
+  - (API) Added `ContainerItemPickupEvent` for item entity pickups into containers.
+  - (API) Added `ContainerTypes.HOPPER`.
+- Added properties `network-settings.raknet-send-cookie` and `network-settings.raknet-max-mtu` to `server.properties`.
+- Implemented Totem of Undying.
+- Implemented End Crystal.
+- Implemented commands `/playsound`, `/stopsound`, `/playanimation`, `/hud`, and `/particle`.
 
 ### Changed
 
 - (API) Refactor and clean up the config util under `org.allaymc.api.config`. This refactor is backward-compatible and shouldn't affect any plugin.
 - (API) Added `ServerPlayerEvent` base class for all `Player` related events under `org.allaymc.api.eventbus.event.server` package.
 - (API) Made `AllayAPI.APIInstanceHolder<T>` public in allay-api by removing the `@ApiStatus.Internal` annotation.
+- (API) `EntityEnderCrystal` now extends `EntityLiving` and `EntityEnderCrystalBaseComponent` interfaces.
+- Entity's display name is now default to the title case. For example: `minecraft:arrow` -> `Arrow`.
+- List plugin command (`/plugin list`) now will show the plugin version.
+
+### Fixed
+
+- (API) Fixed method `Container.removeAllViewers()` won't remove all viewers from the container.
+- Fixed a bug where calling method `Container.removeViewer()` server-side will make the client no longer able to open any container.
+- Fixed a bug where the speed of the player would be incorrect in some special cases.
+- `RAK_SEND_COOKIE` is set to `true` by default in `AllayNetworkInterface` to resolve connection issue.
 
 ### Removed
 
@@ -31,7 +55,7 @@ Unless otherwise specified, any version comparison below is the comparison of th
 
 # 0.10.2 (API 0.19.0) - 2025/12/22
 
-<small>[Compare with 0.10.0](https://github.com/AllayMC/Allay/compare/0.10.1...0.10.2)</small>
+<small>[Compare with 0.10.1](https://github.com/AllayMC/Allay/compare/0.10.1...0.10.2)</small>
 
 ### Added
 
